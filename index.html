@@ -5,115 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>受付システム</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #f4f6f9;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      font-size: 1.4rem;
-      margin-bottom: 16px;
-      color: #1a252f;
-    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 15px; max-width: 650px; margin: 0 auto; background: #f4f6f9; color: #333; }
+    h1 { text-align: center; font-size: 1.5rem; color: #2c3e50; margin-bottom: 20px; }
+    
     .search-box {
       width: 100%;
-      padding: 14px;
+      padding: 14px 16px;
       font-size: 1.1rem;
-      border: 2px solid #2563eb;
+      border: 2px solid #3b82f6;
       border-radius: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 15px;
       outline: none;
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
-      transition: border-color 0.2s;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+      transition: all 0.2s;
     }
     .search-box:focus {
-      border-color: #1d4ed8;
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
-    .search-box:disabled {
-      background-color: #e5e7eb;
-      border-color: #d1d5db;
-    }
-    #status-msg {
-      text-align: center;
-      color: #6b7280;
-      font-weight: bold;
-      padding: 24px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+
+    #loading { text-align: center; color: #64748b; font-weight: bold; padding: 20px; font-size: 1.05rem; }
+    
     .list-item {
       background: #ffffff;
       padding: 16px;
       border-radius: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      border: 1px solid #e2e8f0;
     }
-    .info {
-      flex-grow: 1;
-    }
-    .kana-line {
-      font-size: 0.8rem;
-      color: #6b7280;
-      margin-bottom: 2px;
-    }
-    .name-line {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #111827;
-      margin-bottom: 4px;
-    }
-    .salon-line {
-      font-size: 0.88rem;
-      color: #4b5563;
-      margin-bottom: 8px;
-    }
-    .badge-container {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .seat-badge {
-      background: #1e293b;
-      color: #ffffff;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-    /* 懇親会表示（参加：青字 / ❌） */
-    .party-yes {
-      color: #2563eb;
-      font-weight: bold;
-      font-size: 0.95rem;
-      background: #eff6ff;
-      padding: 3px 8px;
-      border-radius: 4px;
-      border: 1px solid #bfdbfe;
-    }
-    .party-no {
-      color: #dc2626;
-      font-weight: bold;
-      font-size: 0.95rem;
-      background: #fef2f2;
-      padding: 3px 8px;
-      border-radius: 4px;
-      border: 1px solid #fecaca;
-    }
+
+    .info { flex-grow: 1; padding-right: 10px; }
+    .kana-line { font-size: 0.85rem; color: #64748b; margin-bottom: 2px; }
+    .name-line { font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px; }
+    .salon-line { font-size: 0.9rem; color: #475569; margin-bottom: 8px; }
+    
+    .badge-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .seat-badge { background: #1e293b; color: #ffffff; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+    
+    /* 懇親会表示 */
+    .party-yes { color: #2563eb; font-weight: bold; font-size: 0.95rem; background: #eff6ff; padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe; }
+    .party-no { color: #dc2626; font-weight: bold; font-size: 0.95rem; background: #fef2f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fecaca; }
+
     .checkin-btn {
       background-color: #16a34a;
       color: white;
@@ -123,92 +60,259 @@
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      min-width: 96px;
-      transition: background-color 0.2s;
+      min-width: 90px;
+      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
     }
-    .checkin-btn:hover:not(:disabled) {
-      background-color: #15803d;
-    }
+    .checkin-btn:active { transform: scale(0.98); }
     .checkin-btn:disabled {
-      background-color: #d1d5db;
-      color: #6b7280;
+      background-color: #cbd5e1;
+      color: #64748b;
       cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* 座席表スタイル (シート2レイアウトの再現) */
+    .seat-map-container {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+      display: none; /* 検索時のみ表示 */
+    }
+    .seat-map-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #475569;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .stage-row {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .stage-box {
+      border: 1.5px solid #333;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      background: #f8fafc;
+      border-radius: 4px;
+    }
+    .seating-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .grid-row {
+      display: flex;
+      gap: 15px;
+    }
+    .table-group {
+      display: flex;
+      border: 1.5px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .seat-cell {
+      width: 32px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border-right: 1px solid #ccc;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .seat-cell:last-child {
+      border-right: none;
+    }
+    /* 黄色ハイライト */
+    .seat-cell.highlight {
+      background-color: #ffeb3b !important;
+      color: #000 !important;
+      font-weight: 900;
+      box-shadow: inset 0 0 0 2px #f59e0b;
     }
   </style>
 </head>
 <body>
 
   <h1>受付システム</h1>
-  <input type="text" id="searchInput" class="search-box" placeholder="漢字・ひらがなで曖昧検索..." disabled>
+  <input type="text" id="searchInput" class="search-box" placeholder="名前（姓・名）・ふりがなで検索..." disabled>
   
-  <div id="status-msg">データを読み込んでいます...</div>
+  <div id="loading">データを読み込んでいます...</div>
+
+  <!-- 座席表マップ -->
+  <div id="seatMapContainer" class="seat-map-container">
+    <div class="seat-map-title">📍 座席マップ</div>
+    <div class="stage-row">
+      <div class="stage-box" style="margin-left: 20px;">演台</div>
+      <div class="stage-box" style="margin-left: 20px;">プロジェクター</div>
+    </div>
+    <div class="seating-grid">
+      <!-- 列1: 1-3, 4-6 -->
+      <div class="grid-row" style="margin-left: 80px;">
+        <div class="table-group">
+          <div class="seat-cell" data-seat="1">1</div>
+          <div class="seat-cell" data-seat="2">2</div>
+          <div class="seat-cell" data-seat="3">3</div>
+        </div>
+        <div class="table-group">
+          <div class="seat-cell" data-seat="4">4</div>
+          <div class="seat-cell" data-seat="5">5</div>
+          <div class="seat-cell" data-seat="6">6</div>
+        </div>
+      </div>
+      <!-- 列2: 7-9, 10-12, 13-15 -->
+      <div class="grid-row">
+        <div class="table-group">
+          <div class="seat-cell" data-seat="7">7</div>
+          <div class="seat-cell" data-seat="8">8</div>
+          <div class="seat-cell" data-seat="9">9</div>
+        </div>
+        <div class="table-group">
+          <div class="seat-cell" data-seat="10">10</div>
+          <div class="seat-cell" data-seat="11">11</div>
+          <div class="seat-cell" data-seat="12">12</div>
+        </div>
+        <div class="table-group">
+          <div class="seat-cell" data-seat="13">13</div>
+          <div class="seat-cell" data-seat="14">14</div>
+          <div class="seat-cell" data-seat="15">15</div>
+        </div>
+      </div>
+      <!-- 列3: 16-18, 19-21, 22-24 -->
+      <div class="grid-row">
+        <div class="table-group">
+          <div class="seat-cell" data-seat="16">16</div>
+          <div class="seat-cell" data-seat="17">17</div>
+          <div class="seat-cell" data-seat="18">18</div>
+        </div>
+        <div class="table-group">
+          <div class="seat-cell" data-seat="19">19</div>
+          <div class="seat-cell" data-seat="20">20</div>
+          <div class="seat-cell" data-seat="21">21</div>
+        </div>
+        <div class="table-group">
+          <div class="seat-cell" data-seat="22">22</div>
+          <div class="seat-cell" data-seat="23">23</div>
+          <div class="seat-cell" data-seat="24">24</div>
+        </div>
+      </div>
+      <!-- 列4: 25-27, 28-30 (※シート2のレイアウトに準拠) -->
+      <div class="grid-row">
+        <div class="table-group">
+          <div class="seat-cell" data-seat="25">25</div>
+          <div class="seat-cell" data-seat="26">26</div>
+          <div class="seat-cell" data-seat="27">27</div>
+        </div>
+        <div class="table-group" style="margin-left: 77px;">
+          <div class="seat-cell" data-seat="28">28</div>
+          <div class="seat-cell" data-seat="29">29</div>
+          <div class="seat-cell" data-seat="30">30</div>
+        </div>
+      </div>
+      <!-- 列5: 31-33 -->
+      <div class="grid-row">
+        <div class="table-group">
+          <div class="seat-cell" data-seat="31">31</div>
+          <div class="seat-cell" data-seat="32">32</div>
+          <div class="seat-cell" data-seat="33">33</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="resultList"></div>
 
   <script>
-    // 埋め込み済みのWebアプリURL
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyeCwTyiiK1LSZuXmqzJEEV-xZp0UmHmeOY7161sqG3RIbMHpL5Z5H7Y7j8iCZaO-oDlg/exec";
 
     let participantData = [];
 
-    // ページ読み込み時にシームレスに全データを読み込み
+    // ページ読み込み時にデータ事前取得
     window.addEventListener('DOMContentLoaded', fetchParticipants);
 
     async function fetchParticipants() {
-      const statusMsg = document.getElementById('status-msg');
-      const searchInput = document.getElementById('searchInput');
-
       try {
         const response = await fetch(GAS_URL);
-        if (!response.ok) throw new Error('データ取得に失敗しました');
-        
         participantData = await response.json();
         
-        statusMsg.style.display = 'none';
+        document.getElementById('loading').style.display = 'none';
+        const searchInput = document.getElementById('searchInput');
         searchInput.disabled = false;
         searchInput.focus();
-        
-        renderList(participantData);
       } catch (err) {
-        statusMsg.innerText = 'データの読み込みに失敗しました。ページを再読み込みしてください。';
-        statusMsg.style.color = '#dc2626';
+        document.getElementById('loading').innerText = 'データの読み込みに失敗しました。ページを再読み込みしてください。';
         console.error(err);
       }
     }
 
-    // 曖昧検索処理（姓・ふりがな）
+    // 検索入力時のイベントハンドラ
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const keyword = e.target.value.trim().toLowerCase();
+      
+      // 検索キーワードがない時は何も表示しない
       if (!keyword) {
-        renderList(participantData);
+        document.getElementById('seatMapContainer').style.display = 'none';
+        document.getElementById('resultList').innerHTML = '';
+        clearSeatHighlights();
         return;
       }
 
       const filtered = participantData.filter(item => {
         const lastName = (item.lastName || '').toLowerCase();
+        const firstName = (item.firstName || '').toLowerCase();
         const kana = (item.kana || '').toLowerCase();
-        const fullName = lastName + (item.firstName || '').toLowerCase();
+        const fullName = lastName + firstName;
         
-        return lastName.includes(keyword) || kana.includes(keyword) || fullName.includes(keyword);
+        return lastName.includes(keyword) || 
+               firstName.includes(keyword) || 
+               kana.includes(keyword) || 
+               fullName.includes(keyword);
       });
 
-      renderList(filtered);
+      renderListAndSeats(filtered);
     });
 
-    // リストの描画処理
-    function renderList(list) {
+    // ハイライトクリア
+    function clearSeatHighlights() {
+      document.querySelectorAll('.seat-cell').forEach(cell => {
+        cell.classList.remove('highlight');
+      });
+    }
+
+    // 検索結果の描画 ＆ 座席ハイライト
+    function renderListAndSeats(list) {
       const container = document.getElementById('resultList');
+      const seatMap = document.getElementById('seatMapContainer');
       container.innerHTML = '';
+      clearSeatHighlights();
 
       if (list.length === 0) {
-        container.innerHTML = '<div id="status-msg">該当する方が見つかりません</div>';
+        seatMap.style.display = 'none';
+        container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px; font-weight:bold;">該当する参加者が見つかりません</div>';
         return;
       }
 
+      // 座席マップを表示し、該当する席番号を黄色くする
+      seatMap.style.display = 'block';
+      const activeSeats = new Set();
+
       list.forEach(item => {
+        if (item.seat) {
+          activeSeats.add(item.seat.toString().trim());
+        }
+
         const card = document.createElement('div');
         card.className = 'list-item';
 
-        // 懇親会参加判定（「はい」が含まれていれば参加（青字）、それ以外は❌）
         const isPartyJoined = item.party && item.party.toString().includes('はい');
         const partyHtml = isPartyJoined 
           ? '<span class="party-yes">懇親会: 参加</span>' 
@@ -235,22 +339,26 @@
         `;
         container.appendChild(card);
       });
+
+      // 対象の席番号セルにhighlightクラスを付与
+      activeSeats.forEach(seatNum => {
+        const cell = document.querySelector(`.seat-cell[data-seat="${seatNum}"]`);
+        if (cell) {
+          cell.classList.add('highlight');
+        }
+      });
     }
 
-    // 受付ボタン押下時処理
+    // 受付ボタン押下処理
     async function doCheckIn(rowIndex) {
       const btn = document.getElementById(`btn-${rowIndex}`);
-      if (!btn || btn.disabled) return;
-
       btn.disabled = true;
-      btn.innerText = '送信中...';
+      btn.innerText = '処理中...';
 
-      // 画面上のデータ状態を更新
       const target = participantData.find(p => p.rowIndex === rowIndex);
       if (target) target.checkedIn = true;
 
       try {
-        // GASへ受付完了（I列に「○」）をリクエスト
         await fetch(GAS_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -260,7 +368,7 @@
 
         btn.innerText = '受付済';
       } catch (err) {
-        alert('受付処理の送信に失敗しました。再度お試しください。');
+        alert('受付処理に失敗しました。');
         btn.disabled = false;
         btn.innerText = '受付';
         if (target) target.checkedIn = false;
