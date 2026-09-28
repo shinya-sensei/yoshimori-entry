@@ -6,65 +6,63 @@
   <title>受付システム</title>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 15px; max-width: 650px; margin: 0 auto; background: #f4f6f9; color: #333; }
-    h1 { text-align: center; font-size: 1.5rem; color: #2c3e50; margin-bottom: 20px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 10px; max-width: 600px; margin: 0 auto; background: #f4f6f9; color: #333; }
+    
+    .header-title { text-align: center; font-size: 1.2rem; color: #2c3e50; margin: 0 0 10px 0; }
     
     .search-box {
       width: 100%;
-      padding: 14px 16px;
-      font-size: 1.1rem;
+      padding: 10px 14px;
+      font-size: 1.05rem;
       border: 2px solid #3b82f6;
-      border-radius: 10px;
-      margin-bottom: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
       outline: none;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
-      transition: all 0.2s;
-    }
-    .search-box:focus {
-      border-color: #2563eb;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
     }
 
-    #loading { text-align: center; color: #64748b; font-weight: bold; padding: 20px; font-size: 1.05rem; }
+    #loading { text-align: center; color: #64748b; font-weight: bold; padding: 15px; font-size: 0.95rem; }
+    
+    /* 1. 参加者カードを最優先で一番上に表示＆超コンパクト化 */
+    #resultList { margin-bottom: 10px; }
     
     .list-item {
       background: #ffffff;
-      padding: 16px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #cbd5e1;
     }
 
-    .info { flex-grow: 1; padding-right: 10px; }
-    .kana-line { font-size: 0.85rem; color: #64748b; margin-bottom: 2px; }
-    .name-line { font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px; }
-    .salon-line { font-size: 0.9rem; color: #475569; margin-bottom: 8px; }
+    .info { flex-grow: 1; padding-right: 8px; min-width: 0; }
+    .top-line { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+    .name-line { font-size: 1.1rem; font-weight: bold; color: #1e293b; white-space: nowrap; }
+    .kana-line { font-size: 0.75rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub-line { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+    .salon-line { color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
     
-    .badge-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .seat-badge { background: #1e293b; color: #ffffff; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+    .seat-badge { background: #1e293b; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
     
     /* 懇親会表示 */
-    .party-yes { color: #2563eb; font-weight: bold; font-size: 0.95rem; background: #eff6ff; padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe; }
-    .party-no { color: #dc2626; font-weight: bold; font-size: 0.95rem; background: #fef2f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fecaca; }
+    .party-yes { color: #2563eb; font-weight: bold; font-size: 0.8rem; background: #eff6ff; padding: 1px 5px; border-radius: 4px; border: 1px solid #bfdbfe; white-space: nowrap; }
+    .party-no { color: #dc2626; font-weight: bold; font-size: 0.8rem; background: #fef2f2; padding: 1px 5px; border-radius: 4px; border: 1px solid #fecaca; white-space: nowrap; }
 
     .checkin-btn {
       background-color: #16a34a;
       color: white;
       border: none;
-      padding: 12px 18px;
-      font-size: 1rem;
+      padding: 8px 14px;
+      font-size: 0.95rem;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      min-width: 90px;
-      transition: background-color 0.2s, transform 0.1s;
+      min-width: 75px;
       box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
     }
-    .checkin-btn:active { transform: scale(0.98); }
     .checkin-btn:disabled {
       background-color: #cbd5e1;
       color: #64748b;
@@ -72,44 +70,42 @@
       box-shadow: none;
     }
 
-    /* 座席表スタイル（Gridレイアウトで完全整列） */
+    /* 2. 座席マップ（カードの下に配置＆コンパクト化） */
     .seat-map-container {
       background: #ffffff;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 8px;
       border: 1px solid #e2e8f0;
-      margin-bottom: 20px;
       display: none; /* 検索時のみ表示 */
       overflow-x: auto;
     }
     .seat-map-title {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: bold;
-      color: #475569;
-      margin-bottom: 12px;
+      color: #64748b;
+      margin-bottom: 8px;
       text-align: center;
     }
     .seat-grid {
       display: grid;
       grid-template-columns: repeat(3, max-content);
-      gap: 12px 16px;
+      gap: 6px 10px;
       justify-content: center;
     }
 
-    /* 各テーブル・ボックス */
     .table-box {
-      border: 1.5px solid #333;
-      border-radius: 4px;
+      border: 1px solid #333;
+      border-radius: 3px;
       background: #fff;
       display: flex;
       overflow: hidden;
     }
     .stage-box {
-      border: 1.5px solid #333;
-      border-radius: 4px;
+      border: 1px solid #333;
+      border-radius: 3px;
       background: #f8fafc;
-      padding: 6px;
-      font-size: 0.85rem;
+      padding: 2px 4px;
+      font-size: 0.75rem;
       font-weight: bold;
       text-align: center;
       display: flex;
@@ -118,15 +114,14 @@
     }
 
     .seat-cell {
-      width: 32px;
-      height: 30px;
+      width: 26px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: bold;
       border-right: 1px solid #ccc;
-      transition: background-color 0.2s, color 0.2s;
     }
     .seat-cell:last-child {
       border-right: none;
@@ -143,22 +138,23 @@
 </head>
 <body>
 
-  <h1>受付システム</h1>
-  <input type="text" id="searchInput" class="search-box" placeholder="名前（姓・名）・ふりがなで検索..." disabled>
+  <h1 class="header-title">受付システム</h1>
+  <input type="text" id="searchInput" class="search-box" placeholder="名前・ふりがなで検索..." disabled>
   
   <div id="loading">データを読み込んでいます...</div>
 
-  <!-- 座席表マップ (3列のCSS Grid構成) -->
+  <!-- 【変更点1】検索された参加者カードを最優先で一番上に配置 -->
+  <div id="resultList"></div>
+
+  <!-- 【変更点2】座席マップはカードの下に移動＆高さをぎゅっと圧縮 -->
   <div id="seatMapContainer" class="seat-map-container">
     <div class="seat-map-title">📍 座席マップ</div>
     
     <div class="seat-grid">
-      <!-- 行1: 演台, プロジェクター, (空) -->
       <div class="stage-box">演台</div>
       <div class="stage-box">プロジェクター</div>
-      <div></div><!-- 空白 -->
+      <div></div>
 
-      <!-- 行2: 講師席, 1-3, 4-6 -->
       <div class="stage-box">講師席</div>
       <div class="table-box">
         <div class="seat-cell" data-seat="1">1</div>
@@ -171,7 +167,6 @@
         <div class="seat-cell" data-seat="6">6</div>
       </div>
 
-      <!-- 行3: 7-9, 10-12, 13-15 -->
       <div class="table-box">
         <div class="seat-cell" data-seat="7">7</div>
         <div class="seat-cell" data-seat="8">8</div>
@@ -188,7 +183,6 @@
         <div class="seat-cell" data-seat="15">15</div>
       </div>
 
-      <!-- 行4: 16-18, 19-21, 22-24 -->
       <div class="table-box">
         <div class="seat-cell" data-seat="16">16</div>
         <div class="seat-cell" data-seat="17">17</div>
@@ -205,7 +199,6 @@
         <div class="seat-cell" data-seat="24">24</div>
       </div>
 
-      <!-- 行5: 25-27, 25-27(中央), 28-30 -->
       <div class="table-box">
         <div class="seat-cell" data-seat="25">25</div>
         <div class="seat-cell" data-seat="26">26</div>
@@ -222,25 +215,21 @@
         <div class="seat-cell" data-seat="30">30</div>
       </div>
 
-      <!-- 行6: 31-33, (空), (空) -->
       <div class="table-box">
         <div class="seat-cell" data-seat="31">31</div>
         <div class="seat-cell" data-seat="32">32</div>
         <div class="seat-cell" data-seat="33">33</div>
       </div>
-      <div></div><!-- 空白 -->
-      <div></div><!-- 空白 -->
+      <div></div>
+      <div></div>
     </div>
   </div>
-
-  <div id="resultList"></div>
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyeCwTyiiK1LSZuXmqzJEEV-xZp0UmHmeOY7161sqG3RIbMHpL5Z5H7Y7j8iCZaO-oDlg/exec";
 
     let participantData = [];
 
-    // ページ読み込み時にデータ事前取得
     window.addEventListener('DOMContentLoaded', fetchParticipants);
 
     async function fetchParticipants() {
@@ -253,12 +242,11 @@
         searchInput.disabled = false;
         searchInput.focus();
       } catch (err) {
-        document.getElementById('loading').innerText = 'データの読み込みに失敗しました。ページを再読み込みしてください。';
+        document.getElementById('loading').innerText = 'データの読み込みに失敗しました。';
         console.error(err);
       }
     }
 
-    // 検索入力時のイベントハンドラ
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const keyword = e.target.value.trim().toLowerCase();
       
@@ -284,14 +272,12 @@
       renderListAndSeats(filtered);
     });
 
-    // ハイライトクリア
     function clearSeatHighlights() {
       document.querySelectorAll('.seat-cell').forEach(cell => {
         cell.classList.remove('highlight');
       });
     }
 
-    // 検索結果の描画 ＆ 座席ハイライト
     function renderListAndSeats(list) {
       const container = document.getElementById('resultList');
       const seatMap = document.getElementById('seatMapContainer');
@@ -300,7 +286,7 @@
 
       if (list.length === 0) {
         seatMap.style.display = 'none';
-        container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px; font-weight:bold;">該当する参加者が見つかりません</div>';
+        container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:15px; font-weight:bold;">該当する参加者が見つかりません</div>';
         return;
       }
 
@@ -320,14 +306,17 @@
           ? '<span class="party-yes">懇親会: 参加</span>' 
           : '<span class="party-no">懇親会: ❌</span>';
 
+        // コンパクトかつ情報が1〜2行でスッキリ収まる構造
         card.innerHTML = `
           <div class="info">
-            <div class="kana-line">${item.kana || ''}</div>
-            <div class="name-line">${item.lastName || ''} ${item.firstName || ''}</div>
-            <div class="salon-line">${item.salon || ''}</div>
-            <div class="badge-container">
+            <div class="top-line">
+              <span class="name-line">${item.lastName || ''} ${item.firstName || ''}</span>
+              <span class="kana-line">${item.kana || ''}</span>
+            </div>
+            <div class="sub-line">
               <span class="seat-badge">席: ${item.seat || '-'}</span>
               ${partyHtml}
+              <span class="salon-line">${item.salon || ''}</span>
             </div>
           </div>
           <div>
@@ -342,14 +331,12 @@
         container.appendChild(card);
       });
 
-      // 対象の席番号セルにhighlightクラスを付与
       activeSeats.forEach(seatNum => {
         const cells = document.querySelectorAll(`.seat-cell[data-seat="${seatNum}"]`);
         cells.forEach(cell => cell.classList.add('highlight'));
       });
     }
 
-    // 受付ボタン押下処理
     async function doCheckIn(rowIndex) {
       const btn = document.getElementById(`btn-${rowIndex}`);
       btn.disabled = true;
