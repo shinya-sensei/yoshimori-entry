@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>受付システム</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      color: #1a252f;
+    }
+    .search-box {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: 2px solid #2563eb;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      outline: none;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+      transition: border-color 0.2s;
+    }
+    .search-box:focus {
+      border-color: #1d4ed8;
+    }
+    .search-box:disabled {
+      background-color: #e5e7eb;
+      border-color: #d1d5db;
+    }
+    #status-msg {
+      text-align: center;
+      color: #6b7280;
+      font-weight: bold;
+      padding: 24px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .list-item {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .info {
+      flex-grow: 1;
+    }
+    .kana-line {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+    .name-line {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+    .salon-line {
+      font-size: 0.88rem;
+      color: #4b5563;
+      margin-bottom: 8px;
+    }
+    .badge-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .seat-badge {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    /* 懇親会表示（参加：青字 / ❌） */
+    .party-yes {
+      color: #2563eb;
+      font-weight: bold;
+      font-size: 0.95rem;
+      background: #eff6ff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #bfdbfe;
+    }
+    .party-no {
+      color: #dc2626;
+      font-weight: bold;
+      font-size: 0.95rem;
+      background: #fef2f2;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #fecaca;
+    }
+    .checkin-btn {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      min-width: 96px;
+      transition: background-color 0.2s;
+    }
+    .checkin-btn:hover:not(:disabled) {
+      background-color: #15803d;
+    }
+    .checkin-btn:disabled {
+      background-color: #d1d5db;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>受付システム</h1>
+  <input type="text" id="searchInput" class="search-box" placeholder="漢字・ひらがなで曖昧検索..." disabled>
+  
+  <div id="status-msg">データを読み込んでいます...</div>
+  <div id="resultList"></div>
+
+  <script>
+    // 埋め込み済みのWebアプリURL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyeCwTyiiK1LSZuXmqzJEEV-xZp0UmHmeOY7161sqG3RIbMHpL5Z5H7Y7j8iCZaO-oDlg/exec";
+
+    let participantData = [];
+
+    // ページ読み込み時にシームレスに全データを読み込み
+    window.addEventListener('DOMContentLoaded', fetchParticipants);
+
+    async function fetchParticipants() {
+      const statusMsg = document.getElementById('status-msg');
+      const searchInput = document.getElementById('searchInput');
+
+      try {
+        const response = await fetch(GAS_URL);
+        if (!response.ok) throw new Error('データ取得に失敗しました');
+        
+        participantData = await response.json();
+        
+        statusMsg.style.display = 'none';
+        searchInput.disabled = false;
+        searchInput.focus();
+        
+        renderList(participantData);
+      } catch (err) {
+        statusMsg.innerText = 'データの読み込みに失敗しました。ページを再読み込みしてください。';
+        statusMsg.style.color = '#dc2626';
+        console.error(err);
+      }
+    }
+
+    // 曖昧検索処理（姓・ふりがな）
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const keyword = e.target.value.trim().toLowerCase();
+      if (!keyword) {
+        renderList(participantData);
+        return;
+      }
+
+      const filtered = participantData.filter(item => {
+        const lastName = (item.lastName || '').toLowerCase();
+        const kana = (item.kana || '').toLowerCase();
+        const fullName = lastName + (item.firstName || '').toLowerCase();
+        
+        return lastName.includes(keyword) || kana.includes(keyword) || fullName.includes(keyword);
+      });
+
+      renderList(filtered);
+    });
+
+    // リストの描画処理
+    function renderList(list) {
+      const container = document.getElementById('resultList');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = '<div id="status-msg">該当する方が見つかりません</div>';
+        return;
+      }
+
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'list-item';
+
+        // 懇親会参加判定（「はい」が含まれていれば参加（青字）、それ以外は❌）
+        const isPartyJoined = item.party && item.party.toString().includes('はい');
+        const partyHtml = isPartyJoined 
+          ? '<span class="party-yes">懇親会: 参加</span>' 
+          : '<span class="party-no">懇親会: ❌</span>';
+
+        card.innerHTML = `
+          <div class="info">
+            <div class="kana-line">${item.kana || ''}</div>
+            <div class="name-line">${item.lastName || ''} ${item.firstName || ''}</div>
+            <div class="salon-line">${item.salon || ''}</div>
+            <div class="badge-container">
+              <span class="seat-badge">席: ${item.seat || '-'}</span>
+              ${partyHtml}
+            </div>
+          </div>
+          <div>
+            <button class="checkin-btn" 
+                    id="btn-${item.rowIndex}" 
+                    ${item.checkedIn ? 'disabled' : ''} 
+                    onclick="doCheckIn(${item.rowIndex})">
+              ${item.checkedIn ? '受付済' : '受付'}
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 受付ボタン押下時処理
+    async function doCheckIn(rowIndex) {
+      const btn = document.getElementById(`btn-${rowIndex}`);
+      if (!btn || btn.disabled) return;
+
+      btn.disabled = true;
+      btn.innerText = '送信中...';
+
+      // 画面上のデータ状態を更新
+      const target = participantData.find(p => p.rowIndex === rowIndex);
+      if (target) target.checkedIn = true;
+
+      try {
+        // GASへ受付完了（I列に「○」）をリクエスト
+        await fetch(GAS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rowIndex: rowIndex })
+        });
+
+        btn.innerText = '受付済';
+      } catch (err) {
+        alert('受付処理の送信に失敗しました。再度お試しください。');
+        btn.disabled = false;
+        btn.innerText = '受付';
+        if (target) target.checkedIn = false;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
