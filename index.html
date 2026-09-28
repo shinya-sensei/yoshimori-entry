@@ -72,7 +72,7 @@
       box-shadow: none;
     }
 
-    /* 座席表スタイル (シート2レイアウトの再現) */
+    /* 座席表スタイル（Gridレイアウトで完全整列） */
     .seat-map-container {
       background: #ffffff;
       padding: 15px;
@@ -80,44 +80,43 @@
       border: 1px solid #e2e8f0;
       margin-bottom: 20px;
       display: none; /* 検索時のみ表示 */
+      overflow-x: auto;
     }
     .seat-map-title {
       font-size: 0.9rem;
       font-weight: bold;
       color: #475569;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       text-align: center;
     }
-    .stage-row {
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, max-content);
+      gap: 12px 16px;
+      justify-content: center;
+    }
+
+    /* 各テーブル・ボックス */
+    .table-box {
+      border: 1.5px solid #333;
+      border-radius: 4px;
+      background: #fff;
       display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      margin-bottom: 12px;
+      overflow: hidden;
     }
     .stage-box {
       border: 1.5px solid #333;
-      padding: 6px 12px;
+      border-radius: 4px;
+      background: #f8fafc;
+      padding: 6px;
       font-size: 0.85rem;
       font-weight: bold;
-      background: #f8fafc;
-      border-radius: 4px;
-    }
-    .seating-grid {
+      text-align: center;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      justify-content: center;
     }
-    .grid-row {
-      display: flex;
-      gap: 15px;
-    }
-    .table-group {
-      display: flex;
-      border: 1.5px solid #333;
-      border-radius: 4px;
-      overflow: hidden;
-      background: #fff;
-    }
+
     .seat-cell {
       width: 32px;
       height: 30px;
@@ -132,6 +131,7 @@
     .seat-cell:last-child {
       border-right: none;
     }
+    
     /* 黄色ハイライト */
     .seat-cell.highlight {
       background-color: #ffeb3b !important;
@@ -148,84 +148,88 @@
   
   <div id="loading">データを読み込んでいます...</div>
 
-  <!-- 座席表マップ -->
+  <!-- 座席表マップ (3列のCSS Grid構成) -->
   <div id="seatMapContainer" class="seat-map-container">
     <div class="seat-map-title">📍 座席マップ</div>
-    <div class="stage-row">
-      <div class="stage-box" style="margin-left: 20px;">演台</div>
-      <div class="stage-box" style="margin-left: 20px;">プロジェクター</div>
-    </div>
-    <div class="seating-grid">
-      <!-- 列1: 1-3, 4-6 -->
-      <div class="grid-row" style="margin-left: 80px;">
-        <div class="table-group">
-          <div class="seat-cell" data-seat="1">1</div>
-          <div class="seat-cell" data-seat="2">2</div>
-          <div class="seat-cell" data-seat="3">3</div>
-        </div>
-        <div class="table-group">
-          <div class="seat-cell" data-seat="4">4</div>
-          <div class="seat-cell" data-seat="5">5</div>
-          <div class="seat-cell" data-seat="6">6</div>
-        </div>
+    
+    <div class="seat-grid">
+      <!-- 行1: 演台, プロジェクター, (空) -->
+      <div class="stage-box">演台</div>
+      <div class="stage-box">プロジェクター</div>
+      <div></div><!-- 空白 -->
+
+      <!-- 行2: 講師席, 1-3, 4-6 -->
+      <div class="stage-box">講師席</div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="1">1</div>
+        <div class="seat-cell" data-seat="2">2</div>
+        <div class="seat-cell" data-seat="3">3</div>
       </div>
-      <!-- 列2: 7-9, 10-12, 13-15 -->
-      <div class="grid-row">
-        <div class="table-group">
-          <div class="seat-cell" data-seat="7">7</div>
-          <div class="seat-cell" data-seat="8">8</div>
-          <div class="seat-cell" data-seat="9">9</div>
-        </div>
-        <div class="table-group">
-          <div class="seat-cell" data-seat="10">10</div>
-          <div class="seat-cell" data-seat="11">11</div>
-          <div class="seat-cell" data-seat="12">12</div>
-        </div>
-        <div class="table-group">
-          <div class="seat-cell" data-seat="13">13</div>
-          <div class="seat-cell" data-seat="14">14</div>
-          <div class="seat-cell" data-seat="15">15</div>
-        </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="4">4</div>
+        <div class="seat-cell" data-seat="5">5</div>
+        <div class="seat-cell" data-seat="6">6</div>
       </div>
-      <!-- 列3: 16-18, 19-21, 22-24 -->
-      <div class="grid-row">
-        <div class="table-group">
-          <div class="seat-cell" data-seat="16">16</div>
-          <div class="seat-cell" data-seat="17">17</div>
-          <div class="seat-cell" data-seat="18">18</div>
-        </div>
-        <div class="table-group">
-          <div class="seat-cell" data-seat="19">19</div>
-          <div class="seat-cell" data-seat="20">20</div>
-          <div class="seat-cell" data-seat="21">21</div>
-        </div>
-        <div class="table-group">
-          <div class="seat-cell" data-seat="22">22</div>
-          <div class="seat-cell" data-seat="23">23</div>
-          <div class="seat-cell" data-seat="24">24</div>
-        </div>
+
+      <!-- 行3: 7-9, 10-12, 13-15 -->
+      <div class="table-box">
+        <div class="seat-cell" data-seat="7">7</div>
+        <div class="seat-cell" data-seat="8">8</div>
+        <div class="seat-cell" data-seat="9">9</div>
       </div>
-      <!-- 列4: 25-27, 28-30 (※シート2のレイアウトに準拠) -->
-      <div class="grid-row">
-        <div class="table-group">
-          <div class="seat-cell" data-seat="25">25</div>
-          <div class="seat-cell" data-seat="26">26</div>
-          <div class="seat-cell" data-seat="27">27</div>
-        </div>
-        <div class="table-group" style="margin-left: 77px;">
-          <div class="seat-cell" data-seat="28">28</div>
-          <div class="seat-cell" data-seat="29">29</div>
-          <div class="seat-cell" data-seat="30">30</div>
-        </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="10">10</div>
+        <div class="seat-cell" data-seat="11">11</div>
+        <div class="seat-cell" data-seat="12">12</div>
       </div>
-      <!-- 列5: 31-33 -->
-      <div class="grid-row">
-        <div class="table-group">
-          <div class="seat-cell" data-seat="31">31</div>
-          <div class="seat-cell" data-seat="32">32</div>
-          <div class="seat-cell" data-seat="33">33</div>
-        </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="13">13</div>
+        <div class="seat-cell" data-seat="14">14</div>
+        <div class="seat-cell" data-seat="15">15</div>
       </div>
+
+      <!-- 行4: 16-18, 19-21, 22-24 -->
+      <div class="table-box">
+        <div class="seat-cell" data-seat="16">16</div>
+        <div class="seat-cell" data-seat="17">17</div>
+        <div class="seat-cell" data-seat="18">18</div>
+      </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="19">19</div>
+        <div class="seat-cell" data-seat="20">20</div>
+        <div class="seat-cell" data-seat="21">21</div>
+      </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="22">22</div>
+        <div class="seat-cell" data-seat="23">23</div>
+        <div class="seat-cell" data-seat="24">24</div>
+      </div>
+
+      <!-- 行5: 25-27, 25-27(中央), 28-30 -->
+      <div class="table-box">
+        <div class="seat-cell" data-seat="25">25</div>
+        <div class="seat-cell" data-seat="26">26</div>
+        <div class="seat-cell" data-seat="27">27</div>
+      </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="25">25</div>
+        <div class="seat-cell" data-seat="26">26</div>
+        <div class="seat-cell" data-seat="27">27</div>
+      </div>
+      <div class="table-box">
+        <div class="seat-cell" data-seat="28">28</div>
+        <div class="seat-cell" data-seat="29">29</div>
+        <div class="seat-cell" data-seat="30">30</div>
+      </div>
+
+      <!-- 行6: 31-33, (空), (空) -->
+      <div class="table-box">
+        <div class="seat-cell" data-seat="31">31</div>
+        <div class="seat-cell" data-seat="32">32</div>
+        <div class="seat-cell" data-seat="33">33</div>
+      </div>
+      <div></div><!-- 空白 -->
+      <div></div><!-- 空白 -->
     </div>
   </div>
 
@@ -258,7 +262,6 @@
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const keyword = e.target.value.trim().toLowerCase();
       
-      // 検索キーワードがない時は何も表示しない
       if (!keyword) {
         document.getElementById('seatMapContainer').style.display = 'none';
         document.getElementById('resultList').innerHTML = '';
@@ -301,7 +304,6 @@
         return;
       }
 
-      // 座席マップを表示し、該当する席番号を黄色くする
       seatMap.style.display = 'block';
       const activeSeats = new Set();
 
@@ -342,10 +344,8 @@
 
       // 対象の席番号セルにhighlightクラスを付与
       activeSeats.forEach(seatNum => {
-        const cell = document.querySelector(`.seat-cell[data-seat="${seatNum}"]`);
-        if (cell) {
-          cell.classList.add('highlight');
-        }
+        const cells = document.querySelectorAll(`.seat-cell[data-seat="${seatNum}"]`);
+        cells.forEach(cell => cell.classList.add('highlight'));
       });
     }
 
